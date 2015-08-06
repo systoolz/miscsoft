@@ -9,6 +9,9 @@
 ' 1) THIS SCRIPT IS PROVIDED "AS IS" WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES!
 '    USE AT YOUR OWN RISK!
 ' 2) Tested with Gene6 FTP Server v3.10.0 (Build 15).
+'    Minimum required version: Gene6 FTP Server v3.6.0.23 - 18/Jul/2005
+'      Server : Added "OnClientLoginFailed" event.
+'      Change log: http://www.g6ftpserver.com/en/version
 ' 3) This script must be copied to "Scripts" subfolder in your installation
 '    folder of Gene6 FTP Server (later - G6FS). Default installation path:
 '    C:\Program Files\Gene6 FTP Server\Scripts\AutoBan.vbs
