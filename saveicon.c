@@ -74,7 +74,7 @@ int i, cnt, l;
         p = VirtualAllocEx(h, NULL, l, MEM_COMMIT, PAGE_READWRITE);
         // PATCH: Windows 98
         m = 0;
-        if ((!p) && (GetLastError() == 120)) {
+        if ((!p) && (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)) {
           /*
             https://groups.google.com/d/topic/microsoft.public.win32.programmer.kernel/y1QT3OTeMIs
 
