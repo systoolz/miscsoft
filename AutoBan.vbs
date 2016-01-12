@@ -71,7 +71,9 @@ Dim K
     "support", _
     "backup", _
     "guest", _
-    "root" _
+    "root", _
+    "system", _
+    "username"
   )
   For I = 0 To UBound(StopList)
     If (StrComp(Client.Username, StopList(I), vbTextCompare) = 0) Or _
