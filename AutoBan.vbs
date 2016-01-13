@@ -73,7 +73,7 @@ Dim K
     "guest", _
     "root", _
     "system", _
-    "username"
+    "username" _
   )
   For I = 0 To UBound(StopList)
     If (StrComp(Client.Username, StopList(I), vbTextCompare) = 0) Or _
