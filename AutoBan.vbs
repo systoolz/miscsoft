@@ -73,6 +73,18 @@ Dim K
     "guest", _
     "root", _
     "system", _
+    "server", _
+    "local", _
+    "login", _
+    "magazin", _
+    "shop", _
+    "pos", _
+    "pos1", _
+    "terminal", _
+    "oplata", _
+    "order", _
+    "payment", _
+    "zakaz", _
     "username" _
   )
   For I = 0 To UBound(StopList)
