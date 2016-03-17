@@ -56,40 +56,61 @@ Dim StopList
 Dim I
 Dim J
 Dim K
+Dim S
   StopList = Array( _
     "example.com", _
     "example", _
-    "user", _
-    "ftp", _
     "admin", _
-    "ftpadmin", _
     "administrator", _
+    "backup", _
+    "contact", _
+    "demo", _
+    "ftp", _
+    "ftpadmin", _
+    "ftpguest", _
+    "ftpuser", _
+    "guest", _
+    "info", _
+    "local", _
+    "login", _
+    "magazin", _
+    "oplata", _
+    "order", _
+    "payment", _
+    "pos", _
+    "public", _
+    "root", _
+    "server", _
+    "shop", _
+    "support", _
+    "system", _
+    "terminal", _
     "test", _
     "tester", _
     "testing", _
     "testuser", _
-    "support", _
-    "backup", _
-    "guest", _
-    "root", _
-    "system", _
-    "server", _
-    "local", _
-    "login", _
-    "magazin", _
-    "shop", _
-    "pos", _
-    "pos1", _
-    "terminal", _
-    "oplata", _
-    "order", _
-    "payment", _
-    "zakaz", _
-    "username" _
+    "upload", _
+    "user", _
+    "username", _
+    "web", _
+    "webadmin", _
+    "zakaz" _
   )
+  ' Convert "test1", "test12345", etc. to just "test".
+  S = Client.Username
+  For I = "0" To "9"
+    S = Replace(S, I, "")
+  Next
+  S = Trim(S)
+  S = LCase(S)
+  ' Only digits - restore.
+  If Len(S) = 0 Then
+    S = Client.Username
+  End If
+  ' Check each login in StopList().
   For I = 0 To UBound(StopList)
-    If (StrComp(Client.Username, StopList(I), vbTextCompare) = 0) Or _
-       (StrComp(Client.Username, StopList(I) & "@" & StopList(0), vbTextCompare) = 0) Then
+    If (StrComp(S, StopList(I), vbTextCompare) = 0) Or _
+       (StrComp(S, StopList(I) & "@" & StopList(0), vbTextCompare) = 0) Then
       Set Manager = CreateObject("G6FTPServer.Manager")
       ' Check for intersection with the user accounts list.
       K = True
