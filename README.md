@@ -1,5 +1,5 @@
 # miscsoft
-Script, helpers and misc tiny tools
+Scripts, helpers and misc tiny tools
 
 Software page (you can download binary files here):
 
