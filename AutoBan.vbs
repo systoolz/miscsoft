@@ -1,6 +1,6 @@
 ' SCRIPT:  	AutoBan.vbs
 ' AUTHOR:  	SysTools
-' DATE:    	2014.11.26
+' DATE:    	2014.11.26 (UPDATE 2016.09.01)
 ' DESC:    	AutoBan script for Gene6 FTP Server
 ' SITE:    	http://systools.losthost.org/?code=6
 
@@ -74,6 +74,7 @@ Dim S
     "local", _
     "login", _
     "magazin", _
+    "newuser", _
     "oplata", _
     "order", _
     "payment", _
@@ -94,6 +95,7 @@ Dim S
     "username", _
     "web", _
     "webadmin", _
+    "www-data", _
     "zakaz" _
   )
   ' Convert "test1", "test12345", etc. to just "test".
