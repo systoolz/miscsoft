@@ -1,6 +1,6 @@
 ' SCRIPT:  	AutoBan.vbs
 ' AUTHOR:  	SysTools
-' DATE:    	2014.11.26 (UPDATE 2016.09.01)
+' DATE:    	2014.11.26 (UPDATE 2016.11.09)
 ' DESC:    	AutoBan script for Gene6 FTP Server
 ' SITE:    	http://systools.losthost.org/?code=6
 
@@ -83,6 +83,7 @@ Dim S
     "root", _
     "server", _
     "shop", _
+    "site", _
     "support", _
     "system", _
     "terminal", _
@@ -95,6 +96,7 @@ Dim S
     "username", _
     "web", _
     "webadmin", _
+    "www", _
     "www-data", _
     "zakaz" _
   )
