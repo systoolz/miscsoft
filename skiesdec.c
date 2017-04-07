@@ -1,3 +1,10 @@
+/*
+  2017 addendum:
+  Microsoft Enhanced RSA and AES Cryptographic Service Provider (PROV_RSA_AES)
+  available only under Windows XP and newer so use this tool instead:
+  http://systools.losthost.org/?misc#kiesconv
+*/
+
 #include <stdio.h>
 #include <windows.h>
 #include <wincrypt.h>
