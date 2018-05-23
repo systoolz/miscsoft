@@ -1,10 +1,17 @@
 <?php
+  define('CRLF', chr(13).chr(10));
 /*
+  2018 notice: Windows native application TwitchXP.exe can be downloaded here:
+  http://systools.losthost.org/?misc#twitchxp
+
   Twitch.tv live streams playlist downloader
   (HTML5 and Flash players lags so much)
   2017.01.08
 
-  (c) SysTools 2017
+  Twitch.tv switched protocols from HTTP to HTTPS
+  2018.05.23
+
+  (c) SysTools 2017,2018
   http://systools.losthost.org/
   https://github.com/systoolz/miscsoft/
 
@@ -18,13 +25,18 @@
 
 function get_page_from_web($link) {
   $CRLF = chr(13).chr(10);
-  if (substr($link, 0, 7) == 'http://') {
+  $secure = false;
+  if (!strcasecmp(substr($link, 0, 7), 'http://')) {
     $link = substr($link, 7);
+  }
+  if (!strcasecmp(substr($link, 0, 8), 'https://')) {
+    $link = substr($link, 8);
+    $secure = true;
   }
   $host = substr($link, 0, strpos($link, '/'));
   $link = substr($link, strpos($link, '/'));
   $wp = '';
-  $fp = @fsockopen($host, 80, $errno, $errstr, 15);
+  $fp = @fsockopen(($secure ? 'ssl://' : '').$host, ($secure ? 443 : 80), $errno, $errstr, 15);
   if ($fp) {
     $out =
       'GET '.$link.' HTTP/1.0'.$CRLF.
@@ -62,7 +74,7 @@ function get_twich_playlist($channel) {
       'client_id' => 'rp5xf0lwwskmtt1nyuee68mgd0hthrw'
     );
     $link = replace_pattern(
-      'http://api.twitch.tv/api/channels/{channel}/'.
+      'https://api.twitch.tv/api/channels/{channel}/'.
       'access_token?client_id={client_id}',
       $lst
     );
@@ -78,7 +90,7 @@ function get_twich_playlist($channel) {
           'sig' => strval($token->sig),
         );
         $link = replace_pattern(
-          'http://usher.twitch.tv/api/channel/hls/{channel}.m3u8?'.
+          'https://usher.twitch.tv/api/channel/hls/{channel}.m3u8?'.
           'player=twitchweb&token={token}&sig={sig}&allow_audio_only=true&'.
           'allow_source=true&type=any&p={random}',
           $lst
