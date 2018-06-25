@@ -1,5 +1,4 @@
 <?php
-  define('CRLF', chr(13).chr(10));
 /*
   2018 notice: Windows native application TwitchXP.exe can be downloaded here:
   http://systools.losthost.org/?misc#twitchxp
