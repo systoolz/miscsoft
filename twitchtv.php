@@ -1,23 +1,25 @@
 <?php
 /*
-  2018 notice: Windows native application TwitchXP.exe can be downloaded here:
-  http://systools.losthost.org/?misc#twitchxp
-
   Twitch.tv live streams playlist downloader
   (HTML5 and Flash players lags so much)
-  2017.01.08
 
-  Twitch.tv switched protocols from HTTP to HTTPS
-  2018.05.23
-
-  (c) SysTools 2017,2018
+  (c) SysTools 2017-2019
   http://systools.losthost.org/
   https://github.com/systoolz/miscsoft/
+
+  Windows native application "TwitchXP.exe" can be downloaded here:
+  http://systools.losthost.org/?misc#twitchxp
+
+  Changelog:
+  2019.01.06 add rawurlencode() since it was required for some args;
+             removed replace_pattern() and replaced with sprintf()
+  2018.05.23 Twitch.tv switched protocols from HTTP to HTTPS
+  2017.01.08 first publice release
 
   References and documentation links for this code:
   https://www.johannesbader.ch/2014/01/find-video-url-of-twitch-tv-live-streams-or-past-broadcasts/
 
-  AGDQ2017
+  AGDQ/SGDQ
   https://gamesdonequick.com/schedule
   https://player.twitch.tv/?volume=1&channel=gamesdonequick
 */
@@ -44,7 +46,7 @@ function get_page_from_web($link) {
       $CRLF;
     fwrite($fp, $out);
     while (!feof($fp)) {
-      $wp .= fgets($fp, 10*1024);
+      $wp .= fgets($fp, 10 * 1024);
     }
     fclose($fp);
     $wp = substr($wp, strpos($wp, $CRLF.$CRLF) + 4);
@@ -52,47 +54,32 @@ function get_page_from_web($link) {
   return($wp);
 }
 
-function replace_pattern($str, $lst) {
-  $str = strval($str);
-  if (is_array($lst)) {
-    foreach ($lst as $key => $val) {
-      $str = str_replace('{'.$key.'}', $val, $str);
-    }
-  }
-  return($str);
-}
-
 function get_twich_playlist($channel) {
   $result = '';
   if (!empty($channel)) {
-    $channel = strval($channel);
-    $lst = array(
-      'channel' => $channel,
+    $channel = rawurlencode(strval($channel));
+    $link = sprintf(
+      'https://api.twitch.tv/api/channels/%s'.
+      '/access_token?client_id=%s',
+      $channel,
       // this client_id taken from the original Twitch.tv player file:
       // https://player.twitch.tv/vendor/TwitchPlayer.7cfe0f2e9d071ac72c5a539139bcedd4.swf
-      'client_id' => 'rp5xf0lwwskmtt1nyuee68mgd0hthrw'
-    );
-    $link = replace_pattern(
-      'https://api.twitch.tv/api/channels/{channel}/'.
-      'access_token?client_id={client_id}',
-      $lst
+      'rp5xf0lwwskmtt1nyuee68mgd0hthrw'
     );
     $token = get_page_from_web($link);
     if (!empty($token)) {
       $token = trim(strval($token));
       if (substr($token, 0, 1) == '{') {
         $token = json_decode($token);
-        $lst = array(
-          'channel' => $channel,
-          'random' => strval(time()),
-          'token' => strval($token->token),
-          'sig' => strval($token->sig),
-        );
-        $link = replace_pattern(
-          'https://usher.twitch.tv/api/channel/hls/{channel}.m3u8?'.
-          'player=twitchweb&token={token}&sig={sig}&allow_audio_only=true&'.
-          'allow_source=true&type=any&p={random}',
-          $lst
+        $link = sprintf(
+          'https://usher.twitch.tv/api/channel/hls/%s'.
+          '.m3u8?player=twitchweb&token=%s'.
+          '&sig=%s'.
+          '&allow_audio_only=true&allow_source=true&type=any&p=%u',
+          $channel,
+          rawurlencode(strval($token->token)),
+          rawurlencode(strval($token->sig)),
+          time()
         );
         $result = get_page_from_web($link);
       }
