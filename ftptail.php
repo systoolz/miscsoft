@@ -109,7 +109,7 @@ function loadfile($serv, $port, $name) {
   $l = array_map('intval', $l);
   $p = array_pop($l);
   $p |= (array_pop($l) << 8);
-  $s =implode('.', $l);
+  $s = implode('.', $l);
   // set file position to read from
   $tail = $size - $tail;
   // check if file bigger than required tail part (if not - get the whole file)

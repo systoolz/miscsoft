@@ -26,7 +26,7 @@
   Note that xdelta3, source and delta patch files must be in the same folder.
   See the batch/script examples below.
   Save the text between ---/--- and ===/=== as a text file and
-  rename it to the appropriate name as "applyall.bat" or "apply.sh".
+  rename it to the appropriate name as "applyall.bat" or "applyall.sh".
 
   Windows batch file:
   applyall.bat
