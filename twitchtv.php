@@ -3,7 +3,7 @@
   Twitch.tv live streams playlist downloader
   (HTML5 and Flash players lags so much)
 
-  (c) SysTools 2017-2019
+  (c) SysTools 2017-2021
   http://systools.losthost.org/
   https://github.com/systoolz/miscsoft/
 
@@ -11,6 +11,9 @@
   http://systools.losthost.org/?misc#twitchxp
 
   Changelog:
+  2021.07.08 replaced fsockopen() with stream_socket_client() because of PHP 5.6.0+:
+             fsockopen(): Peer certificate CN=`usher.ttvnw.net' did not match
+             expected CN=`usher.twitch.tv' in twitchtv.php on line 41
   2019.01.06 add rawurlencode() since it was required for some args;
              removed replace_pattern() and replaced with sprintf()
   2018.05.23 Twitch.tv switched protocols from HTTP to HTTPS
@@ -26,18 +29,27 @@
 
 function get_page_from_web($link) {
   $CRLF = chr(13).chr(10);
-  $secure = false;
+  $type = 'tcp://';
+  $port = '80';
   if (!strcasecmp(substr($link, 0, 7), 'http://')) {
     $link = substr($link, 7);
   }
   if (!strcasecmp(substr($link, 0, 8), 'https://')) {
     $link = substr($link, 8);
-    $secure = true;
+    $type = 'ssl://';
+    $port = '443';
   }
   $host = substr($link, 0, strpos($link, '/'));
   $link = substr($link, strpos($link, '/'));
   $wp = '';
-  $fp = @fsockopen(($secure ? 'ssl://' : '').$host, ($secure ? 443 : 80), $errno, $errstr, 15);
+  $context = stream_context_create(
+    array('ssl' => array(
+      'verify_peer' => false,
+      'verify_peer_name' => false,
+      'allow_self_signed' => true
+    ))
+  );
+  $fp = stream_socket_client($type.$host.':'.$port, $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $context);
   if ($fp) {
     $out =
       'GET '.$link.' HTTP/1.0'.$CRLF.
