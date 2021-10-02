@@ -11,6 +11,7 @@
   http://systools.losthost.org/?misc#twitchxp
 
   Changelog:
+  2021.10.02 included JSON data validation
   2021.07.08 replaced fsockopen() with stream_socket_client() because of PHP 5.6.0+:
              fsockopen(): Peer certificate CN=`usher.ttvnw.net' did not match
              expected CN=`usher.twitch.tv' in twitchtv.php on line 41
@@ -69,7 +70,7 @@ function get_page_from_web($link) {
 function get_twich_playlist($channel) {
   $result = '';
   if (!empty($channel)) {
-    $channel = rawurlencode(strval($channel));
+    $channel = rawurlencode($channel);
     $link = sprintf(
       'https://api.twitch.tv/api/channels/%s'.
       '/access_token?client_id=%s',
@@ -78,19 +79,21 @@ function get_twich_playlist($channel) {
       // https://player.twitch.tv/vendor/TwitchPlayer.7cfe0f2e9d071ac72c5a539139bcedd4.swf
       'rp5xf0lwwskmtt1nyuee68mgd0hthrw'
     );
-    $token = get_page_from_web($link);
+    $token = trim(get_page_from_web($link));
     if (!empty($token)) {
-      $token = trim(strval($token));
-      if (substr($token, 0, 1) == '{') {
-        $token = json_decode($token);
+      $token = json_decode($token, true);
+      if (
+        (json_last_error() == JSON_ERROR_NONE) && (is_array($token)) &&
+        (array_key_exists('token', $token)) && (array_key_exists('sig', $token))
+      ) {
         $link = sprintf(
           'https://usher.twitch.tv/api/channel/hls/%s'.
           '.m3u8?player=twitchweb&token=%s'.
           '&sig=%s'.
           '&allow_audio_only=true&allow_source=true&type=any&p=%u',
           $channel,
-          rawurlencode(strval($token->token)),
-          rawurlencode(strval($token->sig)),
+          rawurlencode($token['token']),
+          rawurlencode($token['sig']),
           time()
         );
         $result = get_page_from_web($link);
