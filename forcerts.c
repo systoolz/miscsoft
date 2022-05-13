@@ -16,7 +16,8 @@
   THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
   USE AT YOUR OWN RISK AND ONLY WITH FULL UNDERSTANDING OF WHAT YOU'RE DOING.
 
-  Installation: compile forcerts.tbp binary file and move it to The Bat! mail folder.
+  Installation: compile forcerts.tbp binary file and move it to The Bat! mail folder
+  and enable in menu Options - Preferences... - Plug-Ins - Add.
 
   gcc -ansi -Wall -pedantic -Os -s -nostdlib -mnop-fun-dllimport
       -Wl,--add-stdcall-alias,--kill-at -shared forcerts.c
