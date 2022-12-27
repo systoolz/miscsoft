@@ -3,7 +3,7 @@
   Twitch.tv live streams playlist downloader
   (HTML5 and Flash players lags so much)
 
-  (c) SysTools 2017-2021
+  (c) SysTools 2017-2022
   http://systools.losthost.org/
   https://github.com/systoolz/miscsoft/
 
@@ -11,6 +11,7 @@
   http://systools.losthost.org/?misc#twitchxp
 
   Changelog:
+  2022.12.28 old API has been removed, new implementation
   2021.10.02 included JSON data validation
   2021.07.08 replaced fsockopen() with stream_socket_client() because of PHP 5.6.0+:
              fsockopen(): Peer certificate CN=`usher.ttvnw.net' did not match
@@ -20,15 +21,12 @@
   2018.05.23 Twitch.tv switched protocols from HTTP to HTTPS
   2017.01.08 first publice release
 
-  References and documentation links for this code:
-  https://www.johannesbader.ch/2014/01/find-video-url-of-twitch-tv-live-streams-or-past-broadcasts/
-
   AGDQ/SGDQ
   https://gamesdonequick.com/schedule
   https://player.twitch.tv/?volume=1&channel=gamesdonequick
 */
 
-function get_page_from_web($link) {
+function get_page_from_web($link, $data = '', $auth = array()) {
   $CRLF = chr(13).chr(10);
   $type = 'tcp://';
   $port = '80';
@@ -53,16 +51,26 @@ function get_page_from_web($link) {
   $fp = stream_socket_client($type.$host.':'.$port, $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $context);
   if ($fp) {
     $out =
-      'GET '.$link.' HTTP/1.0'.$CRLF.
+      (empty($data) ? 'GET' : 'POST').' '.$link.' HTTP/1.0'.$CRLF.
       'Host: '.$host.$CRLF.
+      (empty($auth) ? '' : implode($CRLF, $auth).$CRLF).
+      (empty($data) ? '' :
+        'Content-Length: '.strlen($data).$CRLF.
+        'Content-Type: text/plain; charset=UTF-8'.$CRLF
+      ).
       'Connection: Close'.$CRLF.
-      $CRLF;
+      $CRLF.
+      $data;
     fwrite($fp, $out);
     while (!feof($fp)) {
       $wp .= fgets($fp, 10 * 1024);
     }
     fclose($fp);
-    $wp = substr($wp, strpos($wp, $CRLF.$CRLF) + 4);
+    $fp = $CRLF.$CRLF;
+    $out = strpos($wp, $fp);
+    if ($out !== false) {
+      $wp = substr($wp, $out + strlen($fp));
+    }
   }
   return($wp);
 }
@@ -71,30 +79,60 @@ function get_twich_playlist($channel) {
   $result = '';
   if (!empty($channel)) {
     $channel = rawurlencode($channel);
-    $link = sprintf(
-      'https://api.twitch.tv/api/channels/%s'.
-      '/access_token?client_id=%s',
-      $channel,
-      // this client_id taken from the original Twitch.tv player file:
-      // https://player.twitch.tv/vendor/TwitchPlayer.7cfe0f2e9d071ac72c5a539139bcedd4.swf
-      'rp5xf0lwwskmtt1nyuee68mgd0hthrw'
+    // get clientId
+    $token = get_page_from_web('https://www.twitch.tv/'.$channel);
+    $auth = array();
+    preg_match('/clientId\s*=\s*"([0-9a-z]+)/is', $token, $auth);
+    $auth = array(
+      'Client-ID: '.array_pop($auth), // required
+      'Device-ID: '.substr(md5(strval(time())), 0, 16) // anything
     );
-    $token = trim(get_page_from_web($link));
+    // get query string
+    $link = array();
+    preg_match('/var\s+query\s*=\s*\'([^\']+)\'/is', $token, $link);
+    $link = html_entity_decode(array_pop($link), ENT_NOQUOTES, 'UTF-8');
+    $token = array(
+      'operationName' => 'PlaybackAccessToken_Template',
+      'query' => $link,
+      'variables' => array(
+        'isLive' => true,
+        'login' => $channel,
+        'isVod' => false,
+        'vodID' => '',
+        'playerType' => 'site'
+      )
+    );
+    // get token
+    $token = trim(get_page_from_web('https://gql.twitch.tv/gql', json_encode($token), $auth));
     if (!empty($token)) {
       $token = json_decode($token, true);
       if (
         (json_last_error() == JSON_ERROR_NONE) && (is_array($token)) &&
-        (array_key_exists('token', $token)) && (array_key_exists('sig', $token))
+        (array_key_exists('data', $token)) && (is_array($token['data'])) &&
+        (array_key_exists('streamPlaybackAccessToken', $token['data']))
       ) {
+        // usher.ttvnw.net
         $link = sprintf(
-          'https://usher.twitch.tv/api/channel/hls/%s'.
-          '.m3u8?player=twitchweb&token=%s'.
+          'https://usher.twitch.tv/api/channel/hls/%s.m3u8?'.
+          'acmb=%s'.
+          '&allow_source=true'.
+          '&fast_bread=true'.
+          '&p=%u'.
+          '&play_session_id=%s'.
+          '&player_backend=mediaplayer'.
+          '&playlist_include_framerate=true'.
+          '&reassignments_supported=true'.
           '&sig=%s'.
-          '&allow_audio_only=true&allow_source=true&type=any&p=%u',
+          '&supported_codecs=avc1'.
+          '&token=%s'.
+          '&cdm=wv'.
+          '&player_version=1.16.0',
           $channel,
-          rawurlencode($token['token']),
-          rawurlencode($token['sig']),
-          time()
+          rawurlencode(base64_encode('{}')), // empty array
+          time(),
+          md5(strval(time())), // anything
+          rawurlencode($token['data']['streamPlaybackAccessToken']['signature']),
+          rawurlencode($token['data']['streamPlaybackAccessToken']['value'])
         );
         $result = get_page_from_web($link);
       }
