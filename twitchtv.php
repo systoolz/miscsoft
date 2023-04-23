@@ -111,9 +111,9 @@ function get_twich_playlist($channel) {
         (array_key_exists('data', $token)) && (is_array($token['data'])) &&
         (array_key_exists('streamPlaybackAccessToken', $token['data']))
       ) {
-        // usher.ttvnw.net
+        // usher.twitch.tv
         $link = sprintf(
-          'https://usher.twitch.tv/api/channel/hls/%s.m3u8?'.
+          'https://usher.ttvnw.net/api/channel/hls/%s.m3u8?'.
           'acmb=%s'.
           '&allow_source=true'.
           '&fast_bread=true'.
