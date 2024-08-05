@@ -3,7 +3,7 @@
   Twitch.tv live streams playlist downloader
   (HTML5 and Flash players lags so much)
 
-  (c) SysTools 2017-2022
+  (c) SysTools 2017-2024
   http://systools.losthost.org/
   https://github.com/systoolz/miscsoft/
 
@@ -11,6 +11,7 @@
   http://systools.losthost.org/?misc#twitchxp
 
   Changelog:
+  2024.08.05 updated JSON code in playlist request
   2022.12.28 old API has been removed, new implementation
   2021.10.02 included JSON data validation
   2021.07.08 replaced fsockopen() with stream_socket_client() because of PHP 5.6.0+:
@@ -99,7 +100,8 @@ function get_twich_playlist($channel) {
         'login' => $channel,
         'isVod' => false,
         'vodID' => '',
-        'playerType' => 'site'
+        'playerType' => 'site',
+        'platform' => 'web'
       )
     );
     // get token
